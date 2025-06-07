@@ -1,0 +1,7 @@
+/* Дополнительные стили */
+.hero {
+    transition: opacity 0.3s ease;
+}
+button:hover {
+    transform: translateY(-1px);
+}
