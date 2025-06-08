@@ -1,6 +1,21 @@
-# Flow Capital Landing
-Лендинг для Flow Capital, соединяем стартапы и инвесторов.
-## Деплой
-1. Загрузите файлы в корень.
-2. В Settings > Pages выберите branch `main`, folder `/`.
-3. Доступ: https://<il-is>.github.io/flow.vc
+Grok AI 3.0 generated
+
+flow.vc/
+├── index.html
+├── startup-form/
+│   ├── index.html
+│   └── form.js
+├── investor-form/
+│   ├── index.html
+│   └── form.js
+├── assets/
+│   ├── css/
+│   │   └── style.css
+│   ├── js/
+│   │   └── main.js
+│   └── img/
+│       ├── logo.png
+│       ├── hero-bg.jpg
+│       └── favicon.ico
+├── .nojekyll
+└── README.md
