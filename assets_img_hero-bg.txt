@@ -1,0 +1,6 @@
+Placeholder hero background:
+- Size: 1600x900 pixels
+- Content: Minimalistic startup/office scene with blue tones
+- Source: https://unsplash.com/photos/gray-and-black-laptop-computer-on-surface-8pb7Hq539Zw
+- Format: JPG
+Download and place in assets/img/hero-bg.jpg or replace with custom background.

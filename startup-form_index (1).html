@@ -1,0 +1,271 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заявка для стартапов — Flow Capital</title>
+    <meta name="description" content="Подайте заявку на инвестиции для стартапа с Flow Capital">
+    <link rel="icon" href="/assets/img/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .form-container { max-width: 800px; margin: 0 auto; padding: 2rem; background: #fff; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .progress-bar { width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; }
+        .progress { height: 100%; background: #1976d2; border-radius: 4px; transition: width 0.3s; }
+        .required::after { content: "*"; color: red; margin-left: 0.25rem; }
+        .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <header class="bg-white py-4 shadow">
+        <div class="max-w-5xl mx-auto px-4 flex justify-between items-center">
+            <a href="/index.html"><img src="/assets/img/logo.png" alt="Flow Capital Logo" class="h-8"></a>
+            <a href="/index.html" class="text-blue-600 hover:underline">На главную</a>
+        </div>
+    </header>
+
+    <section class="py-16 fade-in">
+        <div class="form-container">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4 text-center">Заявка для стартапов</h1>
+            <p class="text-lg text-gray-600 mb-6 text-center">Заполните форму (15–20 мин). Свяжемся в течение 5 дней.</p>
+            <div class="progress-bar mb-6"><div class="progress" style="width: 16.67%"></div></div>
+            <form id="startupForm" action="https://script.google.com/macros/s/AKfycbxBhEzYh_kdxItRCCLD0PKg4sTCIAUTcr0T032YoQdHHvbo4bY5yeZtDvAAc2gGAVqbxw/exec" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="formType" value="Startup">
+                <!-- Step 1: Основная информация -->
+                <div class="step" data-step="1">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Основная информация</h2>
+                    <div class="mb-4">
+                        <label for="name" class="required block text-gray-700 mb-1">Название стартапа:</label>
+                        <input type="text" id="name" name="title" required class="w-full p-2 border rounded">
+                    </div>
+                    <div class="mb-4">
+                        <label for="industry" class="required block text-gray-700 mb-1">Сфера деятельности:</label>
+                        <select id="industry" name="industry" required class="w-full p-2 border rounded">
+                            <option value="">Выберите</option>
+                            <option value="fintech">Финтех</option>
+                            <option value="ai_ml">AI/ML</option>
+                            <option value="retail">Ритейл</option>
+                            <option value="tech">Технологии</option>
+                            <option value="other">Другое</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="contact" class="required block text-gray-700 mb-1">Контактное лицо и email:</label>
+                        <input type="text" id="contact" name="contact" required class="w-full p-2 border rounded">
+                    </div>
+                    <div class="mb-4">
+                        <label for="submission_date" class="required block text-gray-700 mb-1">Дата подачи:</label>
+                        <input type="date" id="submission_date" name="submission_date" required class="w-full p-2 border rounded">
+                    </div>
+                    <div class="mb-4">
+                        <label for="description" class="required block text-gray-700 mb-1">Краткое описание (до 200 слов):</label>
+                        <textarea id="description" name="description" required rows="4" maxlength="500" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" class="hidden bg-gray-300 text-gray-700 py-2 px-4 rounded" disabled>Назад</button>
+                        <button type="button" class="next bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Далее</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Команда -->
+                <div class="step hidden" data-step="2">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Команда</h2>
+                    <div class="mb-4">
+                        <label for="industry_experience" class="required block text-gray-700 mb-1">Опыт команды (до 300 слов):</label>
+                        <textarea id="industry_experience" name="industry_experience" required rows="5" maxlength="1000" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="team_composition" class="required block text-gray-700 mb-1">Состав команды:</label>
+                        <input type="text" id="team_composition" name="team_composition" required class="w-full p-2 border rounded">
+                    </div>
+                    <div class="mb-4">
+                        <label for="team_cohesion" class="block text-gray-700 mb-1">Совместный опыт (до 200 слов):</label>
+                        <textarea id="team_cohesion" name="team_cohesion" rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="vision_strategy" class="required block text-gray-700 mb-1">Видение и стратегия (до 300 слов):</label>
+                        <textarea id="vision_strategy" name="vision_strategy" required rows="5" maxlength="1000" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="investor_communication" class="block text-gray-700 mb-1">Опыт с инвесторами (до 200 слов):</label>
+                        <textarea id="investor_communication" name="investor_communication" rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" class="prev bg-gray-300 text-gray-700 py-2 px-4 rounded">Назад</button>
+                        <button type="button" class="next bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Далее</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Технологии -->
+                <div class="step hidden" data-step="3">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Технологии</h2>
+                    <div class="mb-4">
+                        <label for="tech_innovation" class="required block text-gray-700 mb-1">Новизна технологии (до 300 слов):</label>
+                        <textarea id="tech_innovation" name="tech_innovation" required rows="5" maxlength="1000" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="rnd_infrastructure" class="block text-gray-700 mb-1">R&D-инфраструктура (до 200 слов):</label>
+                        <textarea id="rnd_infrastructure" name="rnd_infrastructure" rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="tech_scalability" class="required block text-gray-700 mb-1">Масштабируемость (до 200 слов):</label>
+                        <textarea id="tech_scalability" name="tech_scalability" required rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" class="prev bg-gray-300 text-gray-700 py-2 px-4 rounded">Назад</button>
+                        <button type="button" class="next bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Далее</button>
+                    </div>
+                </div>
+
+                <!-- Step 4: Продукт и рынок -->
+                <div class="step hidden" data-step="4">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Продукт и рынок</h2>
+                    <div class="mb-4">
+                        <label for="product_description" class="required block text-gray-700 mb-1">Описание продукта (до 300 слов):</label>
+                        <textarea id="product_description" name="product_description" required rows="5" maxlength="1000" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="uniqueness" class="required block text-gray-700 mb-1">Уникальность (до 200 слов):</label>
+                        <textarea id="uniqueness" name="uniqueness" required rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="market_size" class="required block text-gray-700 mb-1">Рынок (до 200 слов):</label>
+                        <textarea id="market_size" name="market_size" required rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="competitive_advantage" class="block text-gray-700 mb-1">Преимущества (до 200 слов):</label>
+                        <textarea id="competitive_advantage" name="competitive_advantage" rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="pitch_deck" class="block text-gray-700 mb-1">Питч-дек (PDF, до 10 МБ):</label>
+                        <input type="file" id="pitch_deck" name="pitch_deck" accept=".pdf" class="w-full p-2">
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" class="prev bg-gray-300 text-gray-700 py-2 px-4 rounded">Назад</button>
+                        <button type="button" class="next bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Далее</button>
+                    </div>
+                </div>
+
+                <!-- Step 5: Финансы и рост -->
+                <div class="step hidden" data-step="5">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Финансы и рост</h2>
+                    <div class="mb-4">
+                        <label for="traction" class="required block text-gray-700 mb-1">Результаты (до 200 слов):</label>
+                        <textarea id="traction" name="traction" required rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="investment_amount" class="required block text-gray-700 mb-1">Сумма инвестиций:</label>
+                        <input type="text" id="investment_amount" name="investment_amount" required class="w-full p-2 border rounded">
+                    </div>
+                    <div class="mb-4">
+                        <label for="fund_usage_plan" class="required block text-gray-700 mb-1">План использования (до 200 слов):</label>
+                        <textarea id="fund_usage_plan" name="fund_usage_plan" required rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="scaling_forecast" class="block text-gray-700 mb-1">Прогноз масштабирования (до 200 слов):</label>
+                        <textarea id="scaling_forecast" name="scaling_forecast" rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="current_investments" class="required block text-gray-700 mb-1">Текущие инвестиции (до 200 слов):</label>
+                        <textarea id="current_investments" name="current_investments" required rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="capital_structure" class="required block text-gray-700 mb-1">Структура капитала (до 200 слов):</label>
+                        <textarea id="capital_structure" name="capital_structure" required rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" class="prev bg-gray-300 text-gray-700 py-2 px-4 rounded">Назад</button>
+                        <button type="button" class="next bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Далее</button>
+                    </div>
+                </div>
+
+                <!-- Step 6: Юридические аспекты -->
+                <div class="step hidden" data-step="6">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Юридические аспекты и риски</h2>
+                    <div class="mb-4">
+                        <label for="company_registration" class="required block text-gray-700 mb-1">Регистрация компании (до 100 слов):</label>
+                        <textarea id="company_registration" name="company_registration" required rows="3" maxlength="200" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="contractual_base" class="block text-gray-700 mb-1">Договорная база (до 200 слов):</label>
+                        <textarea id="contractual_base" name="contractual_base" rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="no_disputes" class="required block text-gray-700 mb-1">Отсутствие споров (до 100 слов):</label>
+                        <textarea id="no_disputes" name="no_disputes" required rows="3" maxlength="200" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="licenses_compliance" class="block text-gray-700 mb-1">Лицензии (до 200 слов):</label>
+                        <textarea id="licenses_compliance" name="licenses_compliance" rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="ip_clarity" class="required block text-gray-700 mb-1">Чистота IP (до 200 слов):</label>
+                        <textarea id="ip_clarity" name="ip_clarity" required rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="risks" class="block text-gray-700 mb-1">Риски (до 200 слов):</label>
+                        <textarea id="risks" name="risks" rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="additional_docs" class="block text-gray-700 mb-1">Документы (PDF, до 10 МБ):</label>
+                        <input type="file" id="additional_docs" name="additional_docs" accept=".pdf" class="w-full p-2">
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" class="prev bg-gray-300 text-gray-700 py-2 px-4 rounded">Назад</button>
+                        <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Отправить</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <footer class="bg-gray-900 text-white py-6">
+        <div class="max-w-5xl mx-auto px-4 text-center">
+            <img src="/assets/img/logo.png" alt="Flow Capital Logo" class="h-8 mx-auto mb-4">
+            <p>© 2025 Flow Capital. Все права защищены.</p>
+            <p>hello@flow.ru</p>
+        </div>
+    </footer>
+
+    <script src="/startup-form/form.js"></script>

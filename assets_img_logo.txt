@@ -1,0 +1,7 @@
+Placeholder logo for Flow Capital:
+- Size: 200x50 pixels
+- Background: Solid blue (#1976D2)
+- Text: "Flow Capital" in white, font Inter, bold, centered
+- Format: PNG
+- Source: https://via.placeholder.com/200x50/1976D2/FFFFFF?text=Flow+Capital
+Download and place in assets/img/logo.png or replace with actual logo.

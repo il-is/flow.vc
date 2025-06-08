@@ -1,0 +1,171 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анкета инвестора — Flow Capital</title>
+    <meta name="description" content="Станьте инвестором с Flow Capital">
+    <link rel="icon" href="/assets/img/favicon.ico">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .form-container { max-width: 800px; margin: 0 auto; padding: 2rem; background: #fff; border-radius: 0.5rem; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+        .progress-bar { width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; }
+        .progress { height: 100%; background: #1976d2; border-radius: 4px; transition: width 0.3s; }
+        .required::after { content: "*"; color: red; margin-left: 0.25rem; }
+        .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <header class="bg-white py-4 shadow">
+        <div class="max-w-5xl mx-auto px-4 flex justify-between items-center">
+            <a href="/index.html"><img src="/assets/img/logo.png" alt="Flow Capital Logo" class="h-8"></a>
+            <a href="/index.html" class="text-blue-600 hover:underline">На главную</a>
+        </div>
+    </header>
+
+    <section class="py-16 fade-in">
+        <div class="form-container">
+            <h1 class="text-3xl font-bold text-gray-900 mb-4 text-center">Анкета инвестора</h1>
+            <p class="text-lg text-gray-600 mb-6 text-center">Заполните форму (5–10 мин). Свяжемся в течение 5 дней.</p>
+            <div class="progress-bar mb-6"><div class="progress" style="width: 33.33%"></div></div>
+            <form id="investorForm" action="https://script.google.com/macros/s/AKfycbxBhEzYh_kdxItRCCLD0PKg4sTCIAUTcr0T032YoQdHHvbo4bY5yeZtDvAAc2gGAVqbxw/exec" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="formType" value="Investor">
+                <!-- Step 1: Основная информация -->
+                <div class="step" data-step="1">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Основная информация</h2>
+                    <div class="mb-4">
+                        <label for="name" class="required block text-gray-700 mb-1">Имя и email:</label>
+                        <input type="text" id="name" name="name" required class="w-full p-2 border rounded">
+                    </div>
+                    <div class="mb-4">
+                        <label for="investor_type" class="required block text-gray-700 mb-1">Тип инвестора:</label>
+                        <select id="investor_type" name="investor_type" required class="w-full p-2 border rounded">
+                            <option value="">Выберите</option>
+                            <option value="angel">Ангел</option>
+                            <option value="vc">Венчурный фонд</option>
+                            <option value="corporate">Корпоративный инвестор</option>
+                            <option value="other">Другое</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="investment_range" class="required block text-gray-700 mb-1">Инвестиционный диапазон:</label>
+                        <input type="text" id="investment_range" name="investment_range" required class="w-full p-2 border rounded" placeholder="10–50 млн ₽">
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" class="hidden bg-gray-300 text-gray-700 py-2 px-4 rounded" disabled>Назад</button>
+                        <button type="button" class="next bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Далее</button>
+                    </div>
+                </div>
+
+                <!-- Step 2: Интересы -->
+                <div class="step hidden" data-step="2">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Интересы</h2>
+                    <div class="mb-4">
+                        <label class="required block text-gray-700 mb-1">Предпочитаемые сферы:</label>
+                        <div class="space-y-2">
+                            <label><input type="checkbox" name="sectors[]" value="fintech"> Финтех</label>
+                            <label><input type="checkbox" name="sectors[]" value="ai_ml"> AI/ML</label>
+                            <label><input type="checkbox" name="sectors[]" value="retail"> Ритейл</label>
+                            <label><input type="checkbox" name="sectors[]" value="tech"> Технологии</label>
+                            <label><input type="checkbox" name="sectors[]" value="other"> Другое</label>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="investment_experience" class="block text-gray-700 mb-1">Опыт инвестиций (до 200 слов):</label>
+                        <textarea id="investment_experience" name="investment_experience" rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="geography" class="block text-gray-700 mb-1">География интересов:</label>
+                        <input type="text" id="geography" name="geography" class="w-full p-2 border rounded" placeholder="Россия, EU">
+                    </div>
+                    <div class="mb-4">
+                        <label for="expected_return" class="block text-gray-700 mb-1">Ожидаемая доходность:</label>
+                        <input type="text" id="expected_return" name="expected_return" class="w-full p-2 border rounded" placeholder="20% IRR">
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" class="prev bg-gray-300 text-gray-700 py-2 px-4 rounded">Назад</button>
+                        <button type="button" class="next bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Далее</button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Дополнительно -->
+                <div class="step hidden" data-step="3">
+                    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Дополнительно</h2>
+                    <div class="mb-4">
+                        <label for="preferred_stage" class="block text-gray-700 mb-1">Предпочитаемый этап стартапа:</label>
+                        <select id="preferred_stage" name="preferred_stage" class="w-full p-2 border rounded">
+                            <option value="">Выберите</option>
+                            <option value="pre_seed">Pre-seed</option>
+                            <option value="seed">Seed</option>
+                            <option value="series_a">Series A</option>
+                            <option value="other">Другое</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label for="additional_info" class="block text-gray-700 mb-1">Дополнительная информация (до 200 слов):</label>
+                        <textarea id="additional_info" name="additional_info" rows="4" maxlength="400" class="w-full p-2 border rounded"></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <label for="documents" class="block text-gray-700 mb-1">Документы (PDF, до 10 МБ):</label>
+                        <input type="file" id="documents" name="documents" accept=".pdf" class="w-full p-2">
+                    </div>
+                    <div class="flex justify-between">
+                        <button type="button" class="prev bg-gray-300 text-gray-700 py-2 px-4 rounded">Назад</button>
+                        <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Отправить</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <footer class="bg-gray-900 text-white py-6">
+        <div class="max-w-5xl mx-auto px-4 text-center">
+            <img src="/assets/img/logo.png" alt="Flow Capital Logo" class="h-8 mx-auto mb-4">
+            <p>© 2025 Flow Capital. Все права защищены.</p>
+            <p>hello@flow.ru</p>
+        </div>
+    </footer>
+
+    <script src="/investor-form/form.js"></script>

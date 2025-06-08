@@ -1,0 +1,7 @@
+Favicon for Flow Capital:
+- Size: 32x32 pixels
+- Background: Solid blue (#1976D2)
+- Text: "F" in white, font Inter, bold, centered
+- Format: ICO
+- Source: https://favicon.io/favicon-generator/ (Text: "F", Font: Inter, Background: #1976D2, Text Color: #FFFFFF)
+Generate and place in assets/img/favicon.ico.
