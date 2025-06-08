@@ -1,70 +1,34 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flow Capital — Умные инвестиции</title>
-    <meta name="description" content="Flow Capital соединяет стартапы и инвесторов для прозрачных сделок с порогом от 10 млн ₽">
+    <meta name="description" content="Flow Capital — умные инвестиции для стартапов и инвесторов">
     <meta name="keywords" content="инвестиции, стартапы, финтех, AI, Flow Capital">
+    <link rel="icon" href="/assets/img/favicon.ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .hero { background-image: linear-gradient(rgba(25, 118, 210, 0.8), rgba(25, 118, 210, 0.5)), url('assets/img/hero-bg.jpg'); background-size: cover; background-position: center; }
-        .btn-outline { border: 2px solid #1976d2; color: #1976d2; }
-        .btn-outline:hover { background: #1976d2; color: #fff; }
+        .hero { background-image: linear-gradient(rgba(25, 118, 210, 0.8), rgba(25, 118, 210, 0.5)), url('/assets/img/hero-bg.jpg'); background-size: cover; background-position: center; }
+        .btn-outline { border: 2px solid #1976d2; color: #1976d2; transition: all 0.3s ease; }
+        .btn-outline:hover { background: #1976d2; color: #fff; transform: translateY(-2px); }
+        .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body class="bg-gray-50">
     <!-- Header -->
     <header class="bg-white py-4 shadow">
         <div class="max-w-5xl mx-auto px-4 flex justify-between items-center">
-            <a href="/index.html"><img src="assets/img/logo.png" alt="Flow Capital Logo" class="h-8"></a>
+            <a href="/index.html"><img src="/assets/img/logo.png" alt="Flow Capital Logo" class="h-8"></a>
             <a href="#cta" class="text-blue-600 hover:underline">Связаться</a>
         </div>
     </header>
 
     <!-- Hero -->
-    <section class="hero text-white py-24 text-center">
+    <section class="hero text-white py-24 text-center fade-in">
         <div class="max-w-5xl mx-auto px-4">
             <h1 class="text-4xl md:text-5xl font-bold mb-4">Flow Capital</h1>
             <p class="text-xl mb-6">Привлечение умных инвестиций в ваш бизнес</p>
@@ -76,7 +40,7 @@
     </section>
 
     <!-- Кто мы -->
-    <section class="py-16 bg-white">
+    <section class="py-16 bg-white fade-in">
         <div class="max-w-5xl mx-auto px-4">
             <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Кто мы</h2>
             <p class="text-lg text-gray-600 mb-4 text-center">Flow Capital — инвестиционная компания нового формата, которая соединяет инвесторов с перспективными стартапами.</p>
@@ -86,13 +50,13 @@
     </section>
 
     <!-- Для кого -->
-    <section class="py-16 bg-gray-50">
+    <section class="py-16 bg-gray-50 fade-in">
         <div class="max-w-5xl mx-auto px-4">
             <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Для кого</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="p-6 bg-blue-50 rounded-lg">
                     <h3 class="text-xl font-semibold text-gray-900 mb-2">Для инвесторов</h3>
-                    <p class="text-gray-600 mb-2">Владельцы бизнеса (МСП, ПАО/АО), семейные офисы, HNWI, топ-менеджеры, корпоративные игроки, экспанты.</p>
+                    <p class="text-gray-600 mb-2">Владельцы бизнеса (МСП, ПАО/АО), семейные офисы, HNWI, топ-менеджеры, корпоративные игроки, экспаты.</p>
                     <ul class="text-gray-600 list-disc pl-5">
                         <li>Доступ к отобранным сделкам.</li>
                         <li>Порог входа от 10 млн ₽.</li>
@@ -116,7 +80,7 @@
     </section>
 
     <!-- Как это работает -->
-    <section class="py-16 bg-white">
+    <section class="py-16 bg-white fade-in">
         <div class="max-w-5xl mx-auto px-4">
             <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Как это работает</h2>
             <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
@@ -145,7 +109,7 @@
     </section>
 
     <!-- Преимущества -->
-    <section class="py-16 bg-gray-50">
+    <section class="py-16 bg-gray-50 fade-in">
         <div class="max-w-5xl mx-auto px-4">
             <h2 class="text-3xl font-bold text-gray-900 mb-6 text-center">Наши преимущества</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -175,7 +139,7 @@
     </section>
 
     <!-- CTA -->
-    <section id="cta" class="py-16 bg-white text-center">
+    <section id="cta" class="py-16 bg-white text-center fade-in">
         <div class="max-w-5xl mx-auto px-4">
             <h2 class="text-3xl font-bold text-gray-900 mb-6">Начните сотрудничество</h2>
             <p class="text-lg text-gray-600 mb-6">От начала сотрудничества нас отделяет форма обратной связи.</p>
@@ -187,7 +151,7 @@
     </section>
 
     <!-- Contacts -->
-    <section class="py-16 bg-gray-50">
+    <section class="py-16 bg-gray-50 fade-in">
         <div class="max-w-5xl mx-auto px-4 text-center">
             <h2 class="text-3xl font-bold text-gray-900 mb-6">Свяжитесь с нами</h2>
             <p class="text-lg text-gray-600 mb-4">hello@flow.ru</p>
@@ -199,12 +163,26 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-6">
+    <footer class="bg-gray-900 text-white py-6 fade-in">
         <div class="max-w-5xl mx-auto px-4 text-center">
-            <img src="assets/img/logo.png" alt="Flow Capital Logo" class="h-8 mx-auto mb-4">
+            <img src="/assets/img/logo.png" alt="Flow Capital Logo" class="h-8 mx-auto mb-4">
             <p>© 2025 Flow Capital. Все права защищены.</p>
             <p>hello@flow.ru</p>
         </div>
     </footer>
 
-    <script src="assets/js/main.js"></script>
+    <script src="/assets/js/main.js"></script>
+    <script>
+        // Fade-in animation on scroll
+        document.addEventListener('DOMContentLoaded', () => {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            fadeElements.forEach(el => observer.observe(el));
+        });
+    </script>
